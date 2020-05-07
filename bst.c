@@ -4,8 +4,8 @@
  * functions for this assignment.  Make sure to add your name and
  * @oregonstate.edu email address below:
  *
- * Name:
- * Email:
+ * Name: Paul Lim
+ * Email: limp@oregonstate.edu
  */
 
 #include <stdio.h>
@@ -13,6 +13,7 @@
 #include <assert.h>
 
 #include "bst.h"
+#include "stack.h"
 
 /*
  * This structure represents a single node in a BST.
@@ -312,7 +313,12 @@ int bst_contains(int val, struct bst* bst) {
  * This is the structure you will use to create an in-order BST iterator.  It
  * is up to you how to define this structure.
  */
-struct bst_iterator;
+struct bst_iterator {
+  int index;
+  int size;
+  struct bst_node *root;
+  struct stack *stack;
+};
 
 
 /*
@@ -385,7 +391,18 @@ int bst_height_helper(struct bst_node *root) {
  *   the values of the nodes add up to sum.  Should return 0 otherwise.
  */
 int bst_path_sum(int sum, struct bst* bst) {
-  return 0;
+  return bst_path_sum_helper(0, sum, bst->root);
+}
+
+int bst_path_sum_helper(int cursum, int sum, struct bst_node *root) {
+  if(root == NULL)
+    return 0;
+  cursum += root->val;
+  if(cursum == sum && root->left == NULL && root->right == NULL)
+    return 1;
+  int left = bst_path_sum_helper(cursum, sum, root->left);
+  int right = bst_path_sum_helper(cursum, sum, root->right);
+  return left || right;
 }
 
 
@@ -402,7 +419,22 @@ int bst_path_sum(int sum, struct bst* bst) {
  *   value in bst (i.e. the leftmost value in the tree).
  */
 struct bst_iterator* bst_iterator_create(struct bst* bst) {
-  return NULL;
+  assert(bst);
+  struct bst_iterator *iter = malloc(sizeof(struct bst_iterator));
+  iter->index = 0;
+  iter->size = bst_size(bst);
+  iter->root = bst->root;
+  struct stack *stack = malloc(sizeof(struct stack*));
+  iter->stack = stack;
+  push_left_nodes(iter->stack, bst->root);
+  return iter;
+}
+
+void push_left_nodes(struct stack* stack, struct bst_node* root) {
+  while(root) {
+    stack_push(stack, root);
+    root = root->left;
+  }
 }
 
 /*
@@ -412,7 +444,9 @@ struct bst_iterator* bst_iterator_create(struct bst* bst) {
  *   iter - the iterator whose memory is to be freed.  May not be NULL.
  */
 void bst_iterator_free(struct bst_iterator* iter) {
-
+  assert(iter);
+  stack_free(iter->stack);
+  free(iter);
 }
 
 
@@ -425,7 +459,7 @@ void bst_iterator_free(struct bst_iterator* iter) {
  *   iter - the iterator to be checked for more values.  May not be NULL.
  */
 int bst_iterator_has_next(struct bst_iterator* iter) {
-  return 0;
+  return !stack_isempty(iter->stack);
 }
 
 
@@ -438,5 +472,7 @@ int bst_iterator_has_next(struct bst_iterator* iter) {
  *     and must have at least one more value to be returned.
  */
 int bst_iterator_next(struct bst_iterator* iter) {
-  return 0;
+  struct bst_node *cur = stack_pop(iter->stack);
+  push_left_nodes(iter->stack, cur->right);
+  return cur->val;
 }

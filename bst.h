@@ -1,7 +1,7 @@
 /*
  * A definition for a binary search tree implementation.
  */
-
+#include "stack.h"
 #ifndef __BST_H
 #define __BST_H
 
@@ -81,11 +81,13 @@ int bst_height(struct bst* bst);
 int bst_height_helper(struct bst_node* root);
 
 int bst_path_sum(int sum, struct bst* bst);
+int bst_path_sum_helper(int cursum, int sum, struct bst_node *root);
 
 struct bst_iterator* bst_iterator_create(struct bst* bst);
 void bst_iterator_free(struct bst_iterator* iter);
 int bst_iterator_has_next(struct bst_iterator* iter);
 int bst_iterator_next(struct bst_iterator* iter);
+void push_left_nodes(struct stack* stack, struct bst_node* root);
 
 
 #endif
