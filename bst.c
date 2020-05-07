@@ -326,7 +326,24 @@ struct bst_iterator;
  *   Should return the total number of elements stored in bst.
  */
 int bst_size(struct bst* bst) {
-  return 0;
+  if(bst->root == NULL)
+    return 0;
+  int size = 1;
+  bst_size_helper(bst->root, &size);
+  return size;
+}
+
+void bst_size_helper(struct bst_node *root, int* size) {
+  if(root == NULL)
+    return;
+  if(root->left) {
+    (*size)++;
+    bst_size_helper(root->left, size);
+  }
+  if(root->right) {
+    (*size)++;
+    bst_size_helper(root->right, size);
+  }
 }
 
 
@@ -343,7 +360,15 @@ int bst_size(struct bst* bst) {
  *   Should return the height of bst.
  */
 int bst_height(struct bst* bst) {
-  return 0;
+  return bst_height_helper(bst->root);
+}
+
+int bst_height_helper(struct bst_node *root) {
+  if(root == NULL)
+    return -1;
+  int left = bst_height_helper(root->left);
+  int right = bst_height_helper(root->right);
+  return left > right ? left + 1 : right + 1;
 }
 
 
